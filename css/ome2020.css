@@ -1,0 +1,207 @@
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+    font-family: "Source Sans Pro", Helvetica, sans-serif;
+    text-transform: initial;
+}
+.reveal h2,
+.reveal h4,
+.reveal h6 {
+    background-color: #ffc107;
+}
+.reveal h1,
+.reveal h5 {
+    background-color: rgb(0, 0, 0, 0.8);
+    color: white;
+    display: inline-block;
+    padding: 0.1em 1em;
+}
+
+.reveal .slides > section,
+.reveal .slides > section > section {
+    padding: 0;
+}
+
+p {
+    text-align: left;
+}
+
+.reveal blockquote {
+    quotes: "“" "”" "‘" "’";
+    text-align: left;
+    padding: 0em 2.5em;
+    border: 0;
+    margin: 0;
+    position: relative;
+}
+blockquote:before {
+    color: #ccc;
+    content: open-quote;
+    font-size: 5em;
+    line-height: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+blockquote footer {
+    font-size: 50%;
+    text-align: right;
+}
+
+.emph {
+    color: darkred;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.quote {
+    quotes: "“" "”" "‘" "’";
+}
+.quote:before {
+    content: open-quote;
+}
+.quote:after {
+    content: close-quote;
+}
+
+.reveal section img {
+    border: 0;
+    vertical-align: middle;
+}
+
+.reveal ul {
+    list-style: url('../images/logos/ome-bullet.png');
+}
+
+li p,
+li li,
+.subtext {
+    font-size: 80%;
+}
+
+.reveal .overlay-image, .reveal .overlay-image-opaque {
+    background-color: rgba(255, 255, 255, 0.8);
+    margin: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.reveal .overlay-image-opaque {
+    background-color: rgba(255, 255, 255, 1);
+}
+.reveal ul.overlay-image, .reveal ul.overlay-image-opaque, .reveal ol.overlay-image, .reveal ol.overlay-image-opaque {
+    padding-left: 1.5em;
+}
+
+.reveal img.highlight {
+    box-shadow: 0 0 10px rgba(204, 0, 0, 0.5);
+}
+
+.reveal a:hover img.highlight {
+    box-shadow: 0 0 20px rgba(204, 0, 0, 1);
+}
+
+.l-double {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+div.l-absolute-full {
+    width: 100%;
+    height: 700px;
+}
+
+.logo-row-images img {
+    float: left;
+    padding: 0 0.2em;
+}
+
+.abs-top-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.abs-top-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+div.timeline div.event {
+    background-color: #ffc107;
+}
+div.arrow {
+    padding: 12pt;
+}
+
+div.idr-system-diagram {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    font-size: 20pt;
+}
+div.idr-system-diagram div:not(:empty) {
+    margin: 2px;
+    background-color: #eeeeff;
+    border-radius: 0.5em;
+}
+div.idr-system-diagram div.arrow {
+    border: 0;
+    font-size: 200%;
+    font-weight: 900;
+    padding: 0;
+    margin: -0.1em;
+    background: none;
+}
+
+div.image-border {
+    border: 2px solid #1976d2;
+    margin: 2px;
+}
+div.image-border img {
+    box-shadow: none;
+}
+
+.block {
+    display: block;
+}
+
+.slide-link a {
+    background-color: black;
+    color: white;
+    padding: 0.2em;
+    font-weight: bold;
+}
+
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+img.h1em {
+    height: 1em;
+}
+
+.flex-container {
+    display: flex;
+}
+.flex1 {
+    flex: 1;
+}
+.flex2 {
+    flex: 2;
+}
+.flex3 {
+    flex: 3;
+}
+.flex4 {
+    flex: 4;
+}
+
+.highlight {
+    color: #cc0000;
+}

@@ -1,0 +1,749 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="title" content="How to install and run OMERO in production">
+    <meta name="description" content="OME 2020 OMERO Systems Installation and Configuration workshop">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://downloads.openmicroscopy.org/presentations/2020/Dundee/Workshops/OME2020-OMERO-Installation/">
+    <meta property="og:title" content="OME2020 OMERO Systems Installation and Configuration workshop">
+    <meta property="og:description" content="How to install and run OMERO in production">
+    <meta property="og:image" content="https://downloads.openmicroscopy.org/presentations/2020/Dundee/Workshops/OME2020-OMERO-Installation/images/media/social-preview.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://downloads.openmicroscopy.org/presentations/2020/Dundee/Workshops/OME2020-OMERO-Installation/">
+    <meta property="twitter:title" content="OME2020 OMERO Systems Installation and Configuration workshop">
+    <meta property="twitter:description" content="How to install and run OMERO in production">
+    <meta property="twitter:image" content="https://downloads.openmicroscopy.org/presentations/2020/Dundee/Workshops/OME2020-OMERO-Installation/images/media/social-preview.jpg">
+
+    <title>How to install and run OMERO in production</title>
+
+    <link rel="stylesheet" href="revealjs-4.0.0/dist/reset.css">
+    <link rel="stylesheet" href="revealjs-4.0.0/dist/reveal.css">
+    <link rel="stylesheet" href="revealjs-4.0.0/dist/theme/white.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="revealjs-4.0.0/plugin/highlight/monokai.css">
+
+    <!-- All fontawesome styles -->
+    <link href="fontawesome-free-5.10.1-web/css/all.min.css" rel="stylesheet">
+
+    <!-- OME2020 customisations -->
+    <link rel="stylesheet" href="css/ome2020.css">
+
+  </head>
+
+  <!-- Several logos taken from https://www.vectorlogo.zone/ -->
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-background-image="images/slidebg/montage-20190903T130724.jpg">
+          <h2>How to install and run OMERO in production</h2>
+          <h5>
+            Simon Li<br/>
+            Open Microscopy Environment<br/>
+            University of Dundee
+          </h5>
+          <h4 class="right" style="width:50%; margin-top: 3em;">OME 2020 OMERO Systems Installation and Configuration workshop</h4>
+          <aside class="notes" data-markdown>
+          </aside>
+        </section>
+
+        <section>
+
+          <section data-background-image="images/slidebg/flickr-tay-bridge-15006600934_de9358316e_o.jpg">
+            <h2>Overview</h2>
+            <ul class="overlay-image">
+              <li>Server requirements</li>
+              <li>Current recommended deployments</li>
+              <li>Live demo: Ansible from scratch</li>
+              <li>A little bit of Docker</li>
+            </ul>
+            <ul class="overlay-image">
+              <li>Short break</li>
+              <li>Questions, more demos, discussions</li>
+            </ul>
+            <aside class="notes">
+            </aside>
+          </section>
+
+          <section data-background-image="images/slidebg/flickr-tay-bridge-15006600934_de9358316e_o.jpg">
+            <h2>Aim</h2>
+            <ul class="overlay-image">
+              <li>Persuade you not to install OMERO manually...</li>
+            </ul>
+            <aside class="notes">
+            </aside>
+          </section>
+
+          <section data-background-image="images/slidebg/flickr-tay-bridge-15006600934_de9358316e_o.jpg">
+            <div class="l-double">
+              <div>
+                <h2>Who am I?</h2>
+                <p class="overlay-image">Software engineer and sysadmin at the OME since 2012</p>
+              </div>
+              <div>
+              </div>
+            </div>
+            <aside class="notes">
+            </aside>
+          </section>
+
+        </section>
+
+        <section>
+          <section data-background-image="images/slidebg/discarded-server.jpg">
+            <h2>Where do we start?</h2>
+            <ol class="overlay-image">
+              <li>Get a server</li>
+              <li>Install an operating system</li>
+            </ol>
+          </section>
+
+          <section data-background-image="images/slidebg/discarded-server.jpg">
+            <h2>Server specification?</h2>
+            <dl class="overlay-image fragment">
+              <h5>Like most things in biology it's complicated</h5>
+              <dt>outreach.openmicroscopy.org</dt>
+              <dd>4 CPU &emsp; 32 GB RAM</dd>
+              <dt>omero.lifesci.dundee.ac.uk</dt>
+              <dd>4 CPU &emsp; 32 GB RAM</dd>
+              <dt>demo.openmicroscopy.org</dt>
+              <dd>8 CPU &emsp; 48 GB RAM</dd>
+            </dl>
+          </section>
+
+          <section data-background-image="images/logos/tux.svg" data-background-size="contain" data-background-position="top right">
+            <h2>Operating system?</h2>
+            <h5 class="left">Does the distribution matter?</h5>
+          </section>
+
+          <section data-background-image="images/slidebg/dev-ops-problem.jpg" data-background-size="contain" class="center">
+            <h5 class="fragment">We test several OMERO on multiple operating systems but there's no substitute for running in production</h5>
+          </section>
+
+          <section>
+            <h2>Which operating system (1)</h2>
+            <div class="flex-container">
+              <img src="images/logos/centos-ar21.svg" class="plain flex4" />
+              <div class="flex1" style="font-size:4em">7</div>
+              <img src="images/logos/redhat-ar21.svg" class="plain flex4" />
+            </div>
+            <p class="subtext">Used by all our production systems, which means we've already found most of the bugs</p>
+            <ul class="subtext overlay-image">
+              <li>Image Data Resource <a href="https://idr.openmicroscopy.org">https://idr.openmicroscopy.org</a></li>
+              <li>University of Dundee <a href="https://omero.lifesci.dundee.ac.uk">https://omero.lifesci.dundee.ac.uk</a></li>
+              <li>Demo server <a href="https://demo.openmicroscopy.org">https://demo.openmicroscopy.org</a></li>
+            </ul>
+            <div>
+              <a href="https://github.com/ome/ansible-example-omero-onenode"><img src="images/logos/ansible-ar21.svg" /></a>
+              <a href="https://github.com/ome/docker-example-omero"><img src="images/logos/docker-ar21.svg" /></a>
+            </div>
+          </section>
+
+          <section>
+            <h2>Which operating system (2)</h2>
+            <div class="flex-container">
+              <img src="images/logos/ubuntu-ar21.svg" class="flex1 plain" />
+              <div class="flex1" style="font-size:4em; vertical-align: bottom;">18.04</div>
+            </div>
+            <p>Popular amongst the OME community</p>
+            <div>
+              <a href="https://galaxy.ansible.com/ome/omero_server"><img src="images/logos/ansible-ar21.svg" /></a> <span class="highlight"><i class="fas fa-arrow-left"></i> New: omero-server support</span>
+            </div>
+          </section>
+
+          <section>
+            <h2>Coming soon ....</h2>
+            <div class="flex-container">
+              <img src="images/logos/centos-ar21.svg" class="plain flex4" />
+              <div class="flex1" style="font-size:4em">8</div>
+              <img src="images/logos/redhat-ar21.svg" class="plain flex4" />
+            </div>
+            <div class="flex-container">
+              <img src="images/logos/ubuntu-ar21.svg" class="flex1 plain" />
+              <div class="flex1" style="font-size:4em; vertical-align: bottom;">20.04</div>
+            </div>
+          </section>
+
+        </section>
+
+        <section data-background-image="images/slidebg/ctir-building-site.jpg">
+          <h2>How should you install OMERO?</h2>
+          <div>
+            <div class="left overlay-image" style="width:50%">
+              <p>The hard way:</p>
+              <ul>
+                <li>Good for learning about OMERO</li>
+                <li>Or if you've got several hours and nothing to do</li>
+              </ul>
+            </div>
+            <a href="https://docs.openmicroscopy.org/omero/5.6/sysadmins/unix/server-centos7-ice36.html">
+              <img src="images/install/docs-sysadmin-centos7-server.png" style="width:20%; vertical-align:top;"/>
+            </a>
+            <a href="https://docs.openmicroscopy.org/omero/5.6/sysadmins/unix/install-web/walkthrough/omeroweb-install-centos7-ice3.6.html">
+              <img src="images/install/docs-sysadmin-centos7-web.png" class="plain" style="width:20%; vertical-align:top;"/>
+            </a>
+          </div>
+          <aside data-markdown>
+            Not so good the second time, or the third....
+            or when there's a major upgrade e.g. to Python 3.
+          </aside>
+        </section>
+
+        <!-- Configuration management -->
+        <section>
+          <section data-background-image="images/slidebg/ctir-building-cables.jpg" class="center">
+            <h1>Configuration management</h1>
+          </section>
+
+          <section>
+            <h2>What is configuration management?</h2>
+
+            <div class="flex-container">
+              <ul class="flex3">
+                <li>A systematic way to setup and configure your servers</li>
+                <li>"Infrastructure as code": Apply the software development process to managing servers</li>
+              </ul>
+              <div class="flex2">
+                <div>
+                  <a href="https://www.ansible.com/">
+                    <img src="images/logos/ansible-ar21.svg" class="highlight"/>
+                  </a>
+                </div>
+                <div>
+                  <a href="https://saltstack.com/">
+                    <img src="images/logos/saltstack-ar21.svg"/>
+                  </a>
+                  <a href="https://www.chef.io/">
+                    <img src="images/logos/chefio-ar21.svg"/>
+                  </a>
+                </div>
+                <div>
+                  <a href="https://puppet.com/">
+                    <img src="images/logos/puppet-ar21.svg"/>
+                  </a>
+                  <a href="https://cfengine.com/">
+                    <img src="images/logos/cfengine-ar21.svg"/>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2>"Infrastructure as code"</h2>
+
+            <div class="l-double">
+              <ul>
+                <li>Self-documenting</li>
+                <li>Version control</li>
+                <li>GitHub code reviews</li>
+              </ul>
+              <div>
+                <a href="https://github.com/ome/prod-playbooks">
+                  <img src="images/install/prod-playbooks-prs.png"/>
+                </a>
+              </div>
+            </div>
+
+          </section>
+
+
+          <section>
+            <h2>Why should you consider it?</h2>
+
+            <p>
+              Fully automated installation, configuration and upgrades
+            </p>
+            <ul>
+              <li>Installs all dependencies</li>
+              <li>Manages OMERO databases <em>including upgrades</em></li>
+              <li>Reproducible deployments</li>
+              <li>You can copy our infrastructure!</li>
+            </ul>
+          </section>
+
+          <section>
+            <div class="flex1">
+              <a href="https://www.ansible.com/">
+                <img src="images/logos/Ansible-Wordmark-RGB-White.svg" style="width: 50%; background-color: black;" />
+              </a>
+            </div>
+            <div class="flexcontainer">
+              <div class="flex1">
+                <ul class="fragmentx">
+                  <li>Relatively easy to setup</li>
+                  <li>Just requires SSH access to servers</li>
+                  <li>Everything configured with YAML</li>
+                </ul>
+                <pre class="bash"><code data-trim>
+                  pip install ansible
+                </code></pre>
+              </div>
+              <div class="flex1">
+                <ul class="fragment">
+                  <li><a href="https://www.ansible.com/webinars-training/introduction-to-ansible">Introduction to Ansible (webinar)</a></li>
+                  <li><a href="https://www.digitalocean.com/community/tags/ansible?type=tutorials">Digital Ocean Ansible tutorials</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <aside class="notes">
+              Digital Ocean has a good set of tutorial for sysadmins.
+            </aside>
+          </section>
+        </section>
+
+
+        <section data-background-image="images/slidebg/flickr-8050490827_99defe693b_o.jpg" class="center">
+          <h2>Still not convinced?</h2>
+          <h5>Live demo!</h5>
+        </section>
+
+        <section data-background-image="images/slidebg/clouds.jpg">
+          <h2>Docker</h2>
+            <a href="https://github.com/ome/docker-example-omero"><i class="fab fa-github"></i> ome/docker-example-omero</a>
+            <pre class="bash"><code data-trim>
+              wget https://raw.githubusercontent.com/ome/\
+              docker-example-omero/master/docker-compose.yml
+
+              docker-compose up -d
+            </code></pre>
+
+            <p class="overlay-image">
+              Even easier than Ansible, if you're happy working with containers.
+            </p>
+
+            <div>
+              <pre class="bash fragment"><code data-trim>
+                apt-get update
+                apt-get install docker-compose docker.io
+              </code></pre>
+            </div>
+          </p>
+        </section>
+
+
+        <section>
+
+          <section class="center" data-background-image="images/slidebg/flickr-8050488275_e7209825be_o.jpg">
+            <h1>Scaling up OMERO</h1>
+            <h5>IDR: Behind the scenes</h5>
+          </section>
+
+          <section data-background-image="images/slidebg/emblebi-openstack.svg" data-background-size="contain">
+            <div class="idr-system-diagram fragment">
+              <div style="grid-area: 1 / 1 / 2 / 2">
+                <img src="images/logos/postgresql-horizontal.svg" class="plain"/>
+              </div>
+
+              <div class="arrow" style="grid-area: 2 / 1 / 3 / 2">⇳</div>
+
+              <div style="grid-area: 3 / 1 / 4 / 2">
+                <img src="images/logos/omero-logo-800.png" class="plain"/>
+                server<br/>
+                web
+              </div>
+
+              <div class="arrow" style="grid-area: 4 / 1 / 5 / 2">⇳</div>
+
+              <div style="grid-area: 5 / 1 / 6 / 2">
+                <img src="images/logos/nginx-ar21.svg" class="plain"/>
+              </div>
+
+              <div style="grid-area: 3 / 3 / 7 / 7" class="fragmentx">
+                <div class="flex-container overlay-image-opaque">
+                  <div class="flex1">
+                    <a href="https://github.com/idr/">
+                      <img src="images/logos/github_octocat.png" class="plain"/>
+                      <img src="images/logos/github_logo.png" class="plain"/>
+                    </a>
+                  </div>
+                  <div class="flex3">
+                    <h2 class="quote">Infrastructure as code</h2>
+                    <ul class="left">
+                      <li>If we can deploy one server with Ansible, we can deploy 2, or 3 ....</li>
+                      <li>Clear separation between data and applications</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <section data-background-image="images/slidebg/emblebi-openstack.svg" data-background-size="contain">
+            <div class="idr-system-diagram">
+              <div style="grid-area: 1 / 1 / 2 / 6">
+                <img src="images/logos/postgresql-horizontal.svg" class="plain"/>
+              </div>
+
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+
+              <div>
+                <img src="images/logos/omero-logo-800.png" class="plain"/>
+                read-only<br/>
+                public web
+              </div>
+              <div>
+                <img src="images/logos/omero-logo-800.png" class="plain"/>
+                read-only<br/>
+                public web
+              </div>
+              <div>
+                <img src="images/logos/omero-logo-800.png" class="plain"/>
+                read-only
+              </div>
+              <div>
+                <img src="images/logos/omero-logo-800.png" class="plain"/>
+                read-only
+              </div>
+              <div>
+                <img src="images/logos/omero-logo-800.png" class="plain"/>
+                read-write
+              </div>
+
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+              <div class="arrow">⇳</div>
+              <div style="grid-area: 4 / 5 / 7 / 5; border: 10px dotted lightgrey;">
+                <img src="images/logos/prometheusio-ar21.svg" class="plain"/>
+                <img src="images/logos/grafana-ar21.svg" class="plain"/>
+                <img src="images/logos/elastic-ar21.svg" class="plain"/>
+              </div>
+
+              <div style="grid-area: 5 / 1 / 7 / 5">
+                <img src="images/logos/nginx-ar21.svg" class="plain"/>
+                <a href="https://idr.openmicroscopy.org">
+                  <img src="images/logos/logo-idr.svg" class="plain" style="height:3em"/>
+                </a>
+                <img src="images/logos/haproxy-ar21.svg" class="plain"/>
+                <code class="block">idr.openmicroscopy.org</code>
+                <code class="block">wss://idr.openmicroscopy.org/omero-ws</code>
+              </div>
+              <h6 style="grid-area: 8 / 1 / 9 / 6">
+                68 vCPU &emsp;
+                264 GB RAM
+                <br/>
+                Storage: &emsp;
+                760 GB ephemeral &emsp;
+                1.7 TB block &emsp;
+                170+ TB read-only NFS
+              </h6>
+            </div>
+            <aside class="notes" data-markdown="">
+              Cluster of 5 OMERO.servers (Java, Python) and OMERO.web (Django, Python). Nginx provides load-balancing and more importantly caching (some queries take a minute or longer)
+
+              Total 68 vCPU, 264 GB RAM, 760 GB ephemeral storage, 1.7 TB block storage
+            </aside>
+          </section>
+
+          <section data-background-image="images/slidebg/idr0038-im3414073.jpg">
+            <h2>How do you debug and test a 150+ TB system?</h2>
+            <div class="fragment">
+              <a href="https://github.com/IDR/deployment/">
+                <div class="image-border overlay-image">
+                  <img src="images/logos/openstack-logo-horizontal.svg" style="height:1.5em;"/>
+                  ➕
+                  <img src="images/logos/ansible-logo.svg" style="height:1.5em;"/>
+                  ➕
+                  <i class="fab fa-github"></i> IDR/deployment
+                </div>
+              </a>
+              <div style="font-size:200%;"><span class="overlay-image">⬇</span></div>
+
+              <div class="flex-container">
+                <div class="flex1 image-border overlay-image">
+                  <img src="images/logos/logo-idr.svg"/>
+                  Production
+                </div>
+                <div class="flex1 image-border overlay-image">
+                  <img src="images/logos/logo-idr.svg"/>
+                  Staging
+                </div>
+                <div class="flex1 image-border overlay-image">
+                  <img src="images/logos/logo-idr.svg"/>
+                  Test-1
+                </div>
+                <div class="flex1 image-border overlay-image">
+                  <img src="images/logos/logo-idr.svg"/>
+                  Test-2
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section data-background-image="images/install/embassy-network.png" data-background-size="contain">
+          </section>
+
+          <section data-background-image="images/install/idr-studies-prod82.svg" data-background-size="contain">
+          </section>
+
+        </section>
+
+        <!-- <section data-background-image="images/slidebg/idr0054-im5025553.jpg"> -->
+
+        <section data-background-image="images/slidebg/idr0015-plate4872.png">
+          <h2>Useful links</h2>
+          <div class="overlay-image-opaque">
+            <p><a href="https://github.com/ome/ansible-example-omero-onenode/">
+              <i class="fab fa-github"></i> ome/ansible-example-omero-onenode
+            </a></p>
+            <p><a href="https://github.com/ome/ansible-example-omero-addons/">
+              <i class="fab fa-github"></i> ome/ansible-example-omero-addons
+            </a></p>
+            <p><a href="https://github.com/ome/omero-deployment-examples/">
+              <i class="fab fa-github"></i> ome/omero-deployment-examples
+            </a></p>
+            <p><a href="https://docs.openmicroscopy.org/omero/5.6/sysadmins/">
+              <img src="images/logos/omero-logomark.svg" class="plain" style="height:1em;"/> System Administrator Documentation
+            </a></p>
+            <p><a href="https://github.com/IDR/deployment/">
+              <i class="fab fa-github"></i> IDR/deployment
+            </a></p>
+            <p><a href="https://github.com/ome/prod-playbooks/">
+              <i class="fab fa-github"></i> ome/prod-playbooks
+            </a></p>
+            <p><a href="https://forum.image.sc/t/setting-up-omero-in-a-new-lab-suggestions-stories-and-advice-welcome/25626">
+              <img src="images/logos/imagesc.png" class="plain" style="height:1em;"/>
+              Setting up OMERO in a new lab
+            </a></p>
+          </div>
+        </section>
+
+
+        <section data-background-image="images/slidebg/idr0047-rois-im4496815.png">
+          <h2>Time for a short break</h2>
+
+          <div class="l-double">
+            <div class="overlay-image-opaque" style="font-size:64%">
+              <p><a href="https://github.com/ome/ansible-example-omero-onenode/">
+                <i class="fab fa-github"></i> ome/ansible-example-omero-onenode
+              </a></p>
+              <p><a href="https://github.com/ome/ansible-example-omero-addons/">
+                <i class="fab fa-github"></i> ome/ansible-example-omero-addons
+              </a></p>
+              <p><a href="https://github.com/ome/omero-deployment-examples/">
+                <i class="fab fa-github"></i> ome/omero-deployment-examples
+              </a></p>
+              <p><a href="https://docs.openmicroscopy.org/omero/5.6/sysadmins/">
+                <img src="images/logos/omero-logomark.svg" class="plain" style="height:1em;"/> System Administrator Documentation
+              </a></p>
+              <p><a href="https://github.com/IDR/deployment/">
+                <i class="fab fa-github"></i> IDR/deployment
+              </a></p>
+              <p><a href="https://github.com/ome/prod-playbooks/">
+                <i class="fab fa-github"></i> ome/prod-playbooks
+              </a></p>
+              <p><a href="https://forum.image.sc/t/setting-up-omero-in-a-new-lab-suggestions-stories-and-advice-welcome/25626">
+                <img src="images/logos/imagesc.png" class="plain" style="height:1em;"/>
+                Setting up OMERO in a new lab
+              </a></p>
+            </div>
+            <ul class="overlay-image-opaque">
+              <li>Questions?</li>
+              <li>OMERO in the Cloud</li>
+              <li>Grafana monitoring</li>
+              <li>Web-sockets</li>
+              <li>SSL</li>
+              <li>IDR deployment</li>
+              <li>Docker</li>
+              <li>Or anything else you want to discuss</li>
+              <li>....</li>
+            </ul>
+          </div>
+        </section>
+
+<!--
+        <section>
+          <section>
+            <h2>What, Why, How?</h2>
+            <ul>
+                <li>What is happening with my systems?</li>
+                <li>Why has it crashed?</li>
+                <li>How can I avoid it in future?</li>
+            </ul>
+
+            <p style="text-align: right; margin-top: 2em;" class="fragment">The solution: Monitoring</p>
+          </section>
+
+          <section data-background="images/monitoring/everything-is-fine.jpg">
+          </section>
+
+          <section>
+            <div style="float:left; width:30%; font-size:10pt; line-height:normal;">
+              <div><a href="https://www.adremsoft.com/">AdRem NetCrunch</a></div>
+              <div><a href="https://airbrake.io">Airbrake.io</a></div>
+              <div><a href="https://aws.amazon.com/cloudwatch/">Amazon Cloudwatch</a></div>
+              <div><a href="https://www.amon.cx">Amon</a></div>
+              <div><a href="https://anturis.com/">Anturis</a></div>
+              <div><a href="https://www.appdynamics.com/">AppDynamics</a></div>
+              <div><a href="https://www.appensure.com/">Appensure</a></div>
+              <div><a href="https://www.appoptics.com">Appoptics</a></div>
+              <div><a href="https://appsignal.com/">Appsignal.com</a></div>
+              <div><a href="http://www.bijk.com">Bijk</a></div>
+              <div><a href="https://www.microsoft.com/en-us/cloud-platform/operations-management-suite">Bluestripe</a></div>
+              <div><a href="http://www.bmc.com/truesightpulse">BMC TrueSighe Pluse</a></div>
+              <div><a href="https://bosun.org">Bosun</a></div>
+              <div><a href="http://cabotapp.com">Cabotapp</a></div>
+              <div><a href="http://cacti.net/">Cacti</a></div>
+              <div><a href="http://www.capasystems.com/">Capasystems</a></div>
+              <div><a href="http://www.ca.com/">CA Technologies</a></div>
+              <div><a href="https://mathias-kettner.com/check_mk.html">Check_MK</a></div>
+              <div><a href="http://www.cisco.com/c/en/us/solutions/cloud/cloud-consumption-service.html">Cisco Cloud Consumption Service</a></div>
+              <div><a href="https://collectd.org">Collectd</a></div>
+              <div><a href="http://www.coscale.com/">Coscale</a></div>
+              <div><a href="https://count.ly/">Count.ly</a></div>
+              <div><a href="https://www.datadoghq.com/dg/apm/lpg/">Datadog</a></div>
+              <div><a href="https://www.dynatrace.com/">Dynatrace</a></div>
+              <div><a href="https://www.eventsentry.com/">Eventsentry</a></div>
+              <div><a href="http://www.gear5.me/">Gear5</a></div>
+              <div><a href="https://getplatypus.io">getplatypus.io</a></div>
+              <div><a href="https://nicolargo.github.io/glances/">Glances</a></div>
+              <div><a href="https://grafana.com">Grafana</a></div>
+              <div><a href="http://graphiteapp.org">Graphiteapp</a></div>
+              <div><a href="http://www.happyapps.io/">Happy Apps</a></div>
+              <div><a href="https://www.host-tracker.com">Host Tracker</a></div>
+              <div><a href="https://www.hpe.com">HPE</a></div>
+            </div>
+
+            <div style="float:left; width:30%; font-size:10pt; line-height:normal;">
+              <div><a href="https://www.ibm.com/middleware/us-en/knowledge/it-service-management/application-performance-management.html">IBM</a></div>
+              <div><a href="https://www.icinga.org/">Icinga</a></div>
+              <div><a href="https://www.idera.com">Idera</a></div>
+              <div><a href="https://www.influxdata.com">InfluxData (InfluxDB)</a></div>
+              <div><a href="http://www.inspectit.rocks/">Inspectit</a></div>
+              <div><a href="https://www.instana.com">instana.com</a></div>
+              <div><a href="http://instrumentalapp.com/">Instrumental</a></div>
+              <div><a href="http://instrumentalapp.com/">Instrumental</a></div>
+              <div><a href="http://www.itrsgroup.com/">ITRS</a></div>
+              <div><a href="https://www.loadview-testing.com/">loadview-testing.com</a></div>
+              <div><a href="http://www.logicmonitor.com/">LogicMonitor</a></div>
+              <div><a href="https://logmatic.io">Logmatic</a></div>
+              <div><a href="http://www.loomsystems.com/">Loom Systems</a></div>
+              <div><a href="https://www.manageengine.com/network-monitoring/">Manageengine Opmanager</a></div>
+              <div><a href="https://mmonit.com/monit/">Monit</a></div>
+              <div><a href="http://www.monitis.com/">Monitis</a></div>
+              <div><a href="http://www.monitorix.org">Monitorix</a></div>
+              <div><a href="http://oss.oetiker.ch/mrtg/">MRTG</a></div>
+              <div><a href="http://munin-monitoring.org/">Munin</a></div>
+              <div><a href="https://my-netdata.io">My-netdata.io</a></div>
+              <div><a href="http://www.nagios.com/">Nagios</a></div>
+              <div><a href="https://netsil.com/">netsil.com</a></div>
+              <div><a href="https://newrelic.com/">New Relic</a></div>
+              <div><a href="https://www.nginx.com/products/nginx-amplify/">Nginx Amplify</a></div>
+              <div><a href="https://nixstats.com">Nixstats</a></div>
+              <div><a href="https://nodequery.com">Nodequery</a></div>
+              <div><a href="https://www.ntop.org">ntop</a></div>
+              <div><a href="https://www.observium.org/">Observium</a></div>
+              <div><a href="https://www.op5.com/">op5</a></div>
+              <div><a href="https://www.opennms.org">OpenNMS</a></div>
+              <div><a href="https://cloud.oracle.com/application-performance-monitoring">Oracle</a></div>
+              <div><a href="https://www.outlyer.com/">Outlyer</a></div>
+              <div><a href="https://www.poweradmin.com/servermonitor/">PA Server Monitor</a></div>
+            </div>
+
+            <div style="float:left; width:30%; font-size:10pt; line-height:normal;">
+              <div><a href="http://pandorafms.org/">Pandora FMS</a></div>
+              <div><a href="http://www.panopta.com/">Panopta</a></div>
+              <div><a href="https://www.pingdom.com">Pingdom</a></div>
+              <div><a href="http://server-monitor.pingdom.com/">Pingdom Server Monitor</a></div>
+              <div><a href="https://plumbr.eu/">plumbr.eu</a></div>
+              <div><a href="https://prometheus.io/">Prometheus.io</a></div>
+              <div><a href="https://www.paessler.com">PRTG</a></div>
+              <div><a href="https://rhq-project.github.io/rhq/">RHQ</a></div>
+              <div><a href="http://www.riverbed.com/">Riverbed</a></div>
+              <div><a href="https://rollbar.com/">Rollbar</a></div>
+              <div><a href="http://oss.oetiker.ch/rrdtool/">RRDtool</a></div>
+              <div><a href="https://scoutapp.github.io/scout_realtime/">Scoutapp Realtime</a></div>
+              <div><a href="https://sematext.com/">Sematext</a></div>
+              <div><a href="https://sensuapp.org/">Sensuapp.org</a></div>
+              <div><a href="https://sentry.io">Sentry</a></div>
+              <div><a href="https://www.serverdensity.com/">Serverdensity</a></div>
+              <div><a href="http://sightlinesystems.com">Sightline Systems</a></div>
+              <div><a href="http://www.solarwinds.com/">Solarwinds</a></div>
+              <div><a href="https://www.splunk.com">Splunk</a></div>
+              <div><a href="https://www.sumologic.com/">Sumologic.com</a></div>
+              <div><a href="http://supervisord.org/">Supervisord</a></div>
+              <div><a href="https://sysdig.com/">Sysdig.com</a></div>
+              <div><a href="https://www.thousandeyes.com/">ThousandEyes</a></div>
+              <div><a href="https://trace.risingstack.com">Trace by RisingStack</a></div>
+              <div><a href="https://traceview.solarwinds.com/">TraceView</a></div>
+              <div><a href="https://unomaly.com">Unomaly</a></div>
+              <div><a href="https://updown.io">updown.io</a></div>
+              <div><a href="https://uptime.com">Uptime.com</a></div>
+              <div><a href="https://uptimerobot.com/">UptimeRobot</a></div>
+              <div><a href="http://www.teamquest.com/en/products-services/vityl-monitor/">Vityl Monitor</a></div>
+              <div><a href="http://www.whatsupgold.com/">WhatsUpGold</a></div>
+              <div><a href="http://www.zabbix.com/">Zabbix</a></div>
+              <div><a href="https://www.zenoss.com/solution/open-source-vs-enterprise">Zenoss</a></div>
+            </div>
+
+            <div class="fragment" style="position:absolute; top:2em; background-color:#f2f6f9;">
+              <h2>So many choices...</h2>
+              <p style="font-size:1em;"><a href="https://haydenjames.io/50-top-server-monitoring-application-performance-monitoring-apm-solutions/">https://haydenjames.io/50-top-server-monitoring-application-performance-monitoring-apm-solutions/</a></p>
+            </div>
+          </section>
+
+          <section data-background="images/monitoring/outreach-grafana-list.png" data-background-size="contain">
+          </section>
+
+          <section data-background="images/monitoring/outreach-grafana-noderesources-7d.png" data-background-size="contain">
+           </section>
+
+          <section data-background="images/monitoring/outreach-grafana-sessions-7d.png" data-background-size="contain">
+          </section>
+
+          <section data-background="images/monitoring/outreach-grafana-counts-5d.png" data-background-size="contain">
+          </section>
+
+          <section data-background="images/monitoring/outreach-grafana-events-3h.png" data-background-size="contain">
+          </section>
+
+          <section data-background="images/monitoring/outreach-grafana-postgresql-3h.png" data-background-size="contain">
+          </section>
+
+          <section data-background="images/monitoring/outreach-prometheus-java_lang_Memory_HeapMemoryUsage_used.png" data-background-size="contain">
+          </section>
+
+          <section data-background="images/monitoring/outreach-prometheus-jmx-blitz.png" data-background-size="contain">
+          </section>
+
+           <section data-background="images/monitoring/idr-analysis-grafana-jupyterhub.png" data-background-size="contain">
+           </section>
+
+        </section>
+ -->
+      </div>
+
+    </div>
+
+    <script src="revealjs-4.0.0/dist/reveal.js"></script>
+    <script src="revealjs-4.0.0/plugin/markdown/markdown.js"></script>
+    <script src="revealjs-4.0.0/plugin/highlight/highlight.js"></script>
+    <script src="revealjs-4.0.0/plugin/zoom/zoom.js"></script>
+    <script src="revealjs-4.0.0/plugin/notes/notes.js"></script>
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        plugins: [ RevealMarkdown, RevealHighlight, RevealZoom, RevealNotes ],
+        center: false,
+        hash: true
+      });
+    </script>
+  </body>
+</html>
